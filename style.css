@@ -3,6 +3,15 @@
     Final Build - Light Theme & GSAP Integration
 ------------------------------------------------------ */
 
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  #hero-background-canvas { display: none !important; }
+}
+
+/* Global media defaults */
+img, video { max-width: 100%; height: auto; display: block; }
+
 /* Reveal Animation Container */
 .reveal-container {
     overflow: hidden;
@@ -44,6 +53,9 @@
     --highlight-base: #333;
 }
 
+html { font-size: 100%; }
+@media (max-width: 768px) { html { font-size: 93.75%; } }
+
 html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
@@ -60,9 +72,7 @@ body {
     /* padding-top is now handled by script.js */
 }
 
-main {
-    transition: padding-top 0.3s ease;
-}
+main { transition: padding-top 0.3s ease; }
 
 /* 2. Preloader */
 #preloader {

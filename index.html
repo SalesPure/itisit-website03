@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ITISIT Inc. - Empowering Global IT Operations</title>
+    <meta name="description" content="ITISIT Inc. provides global IT infrastructure services: Remote Hands, IT Outsourcing, Cabling, Maintenance, Consulting and Supply.">
+    <link rel="canonical" href="https://eclectic-caramel-89bed4.netlify.app/">
+    <meta property="og:title" content="ITISIT Inc. - Empowering Global IT Operations">
+    <meta property="og:description" content="Global IT infrastructure partner. Remote Hands, Outsourcing, Cabling, Maintenance, Consulting and Supply.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ko_KR">
+    <meta name="theme-color" content="#0d6efd">
+
+    <!-- Preload hero image for faster LCP -->
+    <link rel="preload" as="image" href="images/modern data center.jpg" imagesizes="(max-width: 992px) 90vw, 50vw" />
+
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +29,7 @@
     <header>
         <nav class="container">
             <div class="logo">
-                <a href="#"><img src="images/logo.png" alt="ITISIT Inc. Logo"></a>
+                <a href="#"><img src="images/logo.png" alt="ITISIT Inc. Logo" width="160" height="35" fetchpriority="high"></a>
             </div>
             <ul>
                 <li><a href="#about" data-translate-key="nav.about">About</a></li>
@@ -51,7 +62,7 @@
                     <a href="#services" class="btn btn-primary" data-translate-key="hero.button">Our Services</a>
                 </div>
                 <div class="hero-image">
-                    <img src="images/Modern Data Center.jpg" alt="Modern Data Center">
+                    <img src="images/modern data center.jpg" alt="Modern Data Center" width="1200" height="800" decoding="async" fetchpriority="high" sizes="(max-width: 992px) 90vw, 50vw">
                 </div>
             </div>
         </section>
@@ -75,7 +86,7 @@
                     </div>
                     <div class="about-sticky-visuals">
                         <div class="about-image-wrapper">
-                            <img src="images/image_2.png" alt="Our Technology" class="about-img">
+                            <img src="images/image_2.png" alt="Our Technology" class="about-img" loading="lazy" decoding="async">
                             <div class="visual-overlay" data-step-target="1">
                                 <h4 data-translate-key="about.overlay1.title">Global Partner</h4>
                                 <p data-translate-key="about.overlay1.desc">Providing stable services anywhere in the world.</p>
