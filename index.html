@@ -197,6 +197,17 @@ footer{background:var(--bg2);border-top:1px solid rgba(255,255,255,.06);padding:
 
 <!-- INTRO -->
 <div id="intro"><span>It's IT !</span></div>
+<script>
+// Intro dismissal — runs independently, no CDN dependency
+(function(){
+  var intro=document.getElementById('intro');
+  if(!intro)return;
+  setTimeout(function(){
+    intro.classList.add('done');
+    setTimeout(function(){intro.remove()},800);
+  },2200);
+})();
+</script>
 
 <!-- HEADER -->
 <header>
@@ -406,9 +417,9 @@ footer{background:var(--bg2);border-top:1px solid rgba(255,255,255,.06);padding:
         <div class="contact-info">
           <h3>It's IT Inc.</h3>
           <p><strong>Address:</strong> B1F, 164, Jinnam-ro, Nam-gu, Busan, Republic of Korea</p>
-          <div class="div-contact"><span class="div-name">ServicePure</span><a href="/cdn-cgi/l/email-protection#2f5c4a5d59464c4a015f5a5d4a6f465b465c465b46414c014c4042"><span class="__cf_email__" data-cfemail="1e6d7b6c68777d7b306e6b6c7b5e776a776d776a77707d307d7173">[email&#160;protected]</span></a></div>
-          <div class="div-contact"><span class="div-name">SalesPure</span><a href="/cdn-cgi/l/email-protection#f281939e9781dc82878097b29b869b819b869b9c91dc919d9f"><span class="__cf_email__" data-cfemail="9fecfef3faecb1efeaedfadff6ebf6ecf6ebf6f1fcb1fcf0f2">[email&#160;protected]</span></a></div>
-          <div class="div-contact"><span class="div-name">BizPure</span><a href="/cdn-cgi/l/email-protection#d1b3b8abffa1a4a3b491b8a5b8a2b8a5b8bfb2ffb2bebc"><span class="__cf_email__" data-cfemail="5f3d3625712f2a2d3a1f362b362c362b36313c713c3032">[email&#160;protected]</span></a></div>
+          <div class="div-contact"><span class="div-name">ServicePure</span><a href="mailto:service.pure@itisitinc.com">service.pure@itisitinc.com</a></div>
+          <div class="div-contact"><span class="div-name">SalesPure</span><a href="mailto:sales.pure@itisitinc.com">sales.pure@itisitinc.com</a></div>
+          <div class="div-contact"><span class="div-name">BizPure</span><a href="mailto:biz.pure@itisitinc.com">biz.pure@itisitinc.com</a></div>
           <p style="margin-top:16px"><strong>Tel:</strong> <a href="tel:+821050309335">+82 10-5030-9335</a></p>
         </div>
         <form class="contact-form" onsubmit="event.preventDefault();this.querySelector('.fs').textContent='✓ Sent!';this.querySelector('.fs').style.color='#34d399'">
@@ -435,16 +446,13 @@ footer{background:var(--bg2);border-top:1px solid rgba(255,255,255,.06);padding:
 <a href="#contact" class="float-cta">Contact Us</a>
 
 <!-- GSAP -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script>
 (function(){
-  // ===== INTRO =====
-  const intro = document.getElementById('intro');
-  setTimeout(()=>{intro.classList.add('done');setTimeout(()=>{intro.remove();runAll()},800)},2200);
-
+  // Run all animations after page is ready (intro handled separately above)
   function runAll(){
     gsap.registerPlugin(ScrollTrigger,ScrollToPlugin);
     heroAnim();
@@ -453,6 +461,10 @@ footer{background:var(--bg2);border-top:1px solid rgba(255,255,255,.06);padding:
     reveals();
     ui();
   }
+
+  // Wait for intro to finish, then start animations
+  var startDelay = 2400;
+  setTimeout(runAll, startDelay);
 
   // ===== HERO ANIMATION =====
   function heroAnim(){
