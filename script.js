@@ -83,9 +83,9 @@
       gsap.to(el, {
         opacity: 1,
         y: 0,
-        duration: 0.8,
+        duration: 0.5,
         ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+        scrollTrigger: { trigger: el, start: 'top 92%', once: true },
       });
     });
 
@@ -93,9 +93,9 @@
     gsap.from('.hero-text .reveal-container', {
       opacity: 0,
       y: 40,
-      stagger: 0.2,
-      duration: 0.8,
-      delay: 2.5,
+      stagger: 0.15,
+      duration: 0.6,
+      delay: 1.5,
       ease: 'power3.out',
     });
 
@@ -103,8 +103,8 @@
     gsap.from('.hero-image', {
       opacity: 0,
       x: 60,
-      duration: 1,
-      delay: 3,
+      duration: 0.7,
+      delay: 1.8,
       ease: 'power3.out',
     });
 
@@ -124,7 +124,7 @@
             { val: 0 },
             { val: target },
             {
-              duration: 1.5,
+              duration: 1.0,
               ease: 'power2.out',
               onUpdate: function () {
                 el.textContent = Math.round(this.targets()[0].val) + suffix;
@@ -161,56 +161,56 @@
     // Service cards stagger
     gsap.utils.toArray('.service-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0, y: 40, duration: 0.6, delay: i * 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 85%', once: true },
+        opacity: 0, y: 30, duration: 0.45, delay: i * 0.06, ease: 'power3.out',
+        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
       });
     });
 
     // Why cards
     gsap.utils.toArray('.why-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0, y: 30, duration: 0.6, delay: i * 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 85%', once: true },
+        opacity: 0, y: 20, duration: 0.45, delay: i * 0.06, ease: 'power3.out',
+        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
       });
     });
 
     // Client cards
     gsap.utils.toArray('.client-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0, y: 20, duration: 0.5, delay: i * 0.05, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 90%', once: true },
+        opacity: 0, y: 15, duration: 0.35, delay: i * 0.04, ease: 'power3.out',
+        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
       });
     });
 
     // Coverage cards
     gsap.utils.toArray('.coverage-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0, y: 30, duration: 0.6, delay: i * 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 85%', once: true },
+        opacity: 0, y: 20, duration: 0.45, delay: i * 0.07, ease: 'power3.out',
+        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
       });
     });
 
     // Lifecycle steps
     gsap.utils.toArray('.lifecycle-step').forEach((step, i) => {
       gsap.from(step, {
-        opacity: 0, y: 30, duration: 0.5, delay: i * 0.15, ease: 'power3.out',
-        scrollTrigger: { trigger: step, start: 'top 85%', once: true },
+        opacity: 0, y: 20, duration: 0.4, delay: i * 0.08, ease: 'power3.out',
+        scrollTrigger: { trigger: step, start: 'top 92%', once: true },
       });
     });
 
     // Section headers
     gsap.utils.toArray('.section-header').forEach((header) => {
       gsap.from(header.children, {
-        opacity: 0, y: 30, stagger: 0.12, duration: 0.7, ease: 'power3.out',
-        scrollTrigger: { trigger: header, start: 'top 85%', once: true },
+        opacity: 0, y: 20, stagger: 0.08, duration: 0.5, ease: 'power3.out',
+        scrollTrigger: { trigger: header, start: 'top 92%', once: true },
       });
     });
 
     // Trust items
     gsap.utils.toArray('.trust-item').forEach((item, i) => {
       gsap.from(item, {
-        opacity: 0, y: 20, duration: 0.5, delay: i * 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: item, start: 'top 90%', once: true },
+        opacity: 0, y: 15, duration: 0.35, delay: i * 0.06, ease: 'power3.out',
+        scrollTrigger: { trigger: item, start: 'top 92%', once: true },
       });
     });
   }
