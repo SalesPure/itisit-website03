@@ -71,7 +71,7 @@
           <a href="#services" class="btn btn-outline" data-translate-key="hero.cta2">Our Services</a>
         </div>
       </div>
-      <div class="hero-image">
+      <div class="hero-image" data-parallax="0.15">
         <img src="images/modern data center.jpg" alt="Modern Data Center" width="1200" height="800" decoding="async" fetchpriority="high" sizes="(max-width:992px) 90vw, 50vw">
       </div>
     </div>
@@ -143,14 +143,16 @@
   </section>
 
   <!-- SERVICES -->
-  <section id="services" class="section bg-dark">
+  <section id="services" class="section services-section bg-dark">
     <div class="container">
       <div class="section-header">
         <span class="section-tag" data-translate-key="services.tag">What We Do</span>
         <h2 data-translate-key="services.title">Core Services</h2>
         <p class="section-desc" data-translate-key="services.desc">End-to-end infrastructure services from consulting to installation and lifecycle management.</p>
       </div>
-      <div class="services-grid">
+    </div>
+    <div class="services-scroll-wrapper">
+      <div class="services-scroll-track">
 
         <div class="service-card" data-service="dc">
           <div class="service-icon">
@@ -206,8 +208,6 @@
       </div>
     </div>
   </section>
-
-  <!-- OPERATIONAL LIFECYCLE -->
   <section class="section lifecycle-section">
     <div class="container">
       <div class="section-header">
@@ -217,11 +217,11 @@
       </div>
       <div class="lifecycle-flow">
         <div class="lifecycle-step"><div class="step-num">01</div><h4 data-translate-key="lifecycle.s1.title">Plan</h4><p data-translate-key="lifecycle.s1.desc">Consulting · Design · Assessment</p></div>
-        <div class="lifecycle-arrow">→</div>
+        <div class="lifecycle-connector"></div>
         <div class="lifecycle-step"><div class="step-num">02</div><h4 data-translate-key="lifecycle.s2.title">Deploy</h4><p data-translate-key="lifecycle.s2.desc">Installation · Configuration · Testing</p></div>
-        <div class="lifecycle-arrow">→</div>
+        <div class="lifecycle-connector"></div>
         <div class="lifecycle-step"><div class="step-num">03</div><h4 data-translate-key="lifecycle.s3.title">Operate</h4><p data-translate-key="lifecycle.s3.desc">Monitoring · Maintenance · 24/7 Support</p></div>
-        <div class="lifecycle-arrow">→</div>
+        <div class="lifecycle-connector"></div>
         <div class="lifecycle-step"><div class="step-num">04</div><h4 data-translate-key="lifecycle.s4.title">Support</h4><p data-translate-key="lifecycle.s4.desc">Break/Fix · Upgrades · Reporting</p></div>
       </div>
       <div class="service-models">
@@ -464,6 +464,7 @@
 <a href="#" class="scroll-to-top-btn" title="Go to top">↑</a>
 
 <!-- Scripts -->
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
