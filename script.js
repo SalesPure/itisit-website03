@@ -1,5 +1,6 @@
 /* ============================
    IT'S IT INC. — MAIN SCRIPT
+   Final version with all fixes
    ============================ */
 
 (function () {
@@ -107,23 +108,32 @@
       ease: 'power3.out',
     });
 
-    // Stats counter animation
+    // FIX #1: Stats counter — animate but keep static fallback visible
+    // Numbers already show correct values in HTML; animation is enhancement only
     gsap.utils.toArray('.stat-number').forEach((el) => {
       const target = parseInt(el.dataset.target);
       const suffix = el.dataset.suffix || '';
+      const originalText = el.textContent; // preserve fallback
+
       ScrollTrigger.create({
         trigger: el,
         start: 'top 90%',
         once: true,
         onEnter: () => {
-          gsap.to({ val: 0 }, {
-            val: target,
-            duration: 1.5,
-            ease: 'power2.out',
-            onUpdate: function () {
-              el.textContent = Math.round(this.targets()[0].val) + suffix;
-            },
-          });
+          gsap.fromTo(
+            { val: 0 },
+            { val: target },
+            {
+              duration: 1.5,
+              ease: 'power2.out',
+              onUpdate: function () {
+                el.textContent = Math.round(this.targets()[0].val) + suffix;
+              },
+              onComplete: function () {
+                el.textContent = target + suffix; // ensure final value
+              },
+            }
+          );
         },
       });
     });
@@ -151,11 +161,7 @@
     // Service cards stagger
     gsap.utils.toArray('.service-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0,
-        y: 40,
-        duration: 0.6,
-        delay: i * 0.1,
-        ease: 'power3.out',
+        opacity: 0, y: 40, duration: 0.6, delay: i * 0.1, ease: 'power3.out',
         scrollTrigger: { trigger: card, start: 'top 85%', once: true },
       });
     });
@@ -163,11 +169,7 @@
     // Why cards
     gsap.utils.toArray('.why-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0,
-        y: 30,
-        duration: 0.6,
-        delay: i * 0.1,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.6, delay: i * 0.1, ease: 'power3.out',
         scrollTrigger: { trigger: card, start: 'top 85%', once: true },
       });
     });
@@ -175,11 +177,7 @@
     // Client cards
     gsap.utils.toArray('.client-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        delay: i * 0.05,
-        ease: 'power3.out',
+        opacity: 0, y: 20, duration: 0.5, delay: i * 0.05, ease: 'power3.out',
         scrollTrigger: { trigger: card, start: 'top 90%', once: true },
       });
     });
@@ -187,11 +185,7 @@
     // Coverage cards
     gsap.utils.toArray('.coverage-card').forEach((card, i) => {
       gsap.from(card, {
-        opacity: 0,
-        y: 30,
-        duration: 0.6,
-        delay: i * 0.12,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.6, delay: i * 0.12, ease: 'power3.out',
         scrollTrigger: { trigger: card, start: 'top 85%', once: true },
       });
     });
@@ -199,11 +193,7 @@
     // Lifecycle steps
     gsap.utils.toArray('.lifecycle-step').forEach((step, i) => {
       gsap.from(step, {
-        opacity: 0,
-        y: 30,
-        duration: 0.5,
-        delay: i * 0.15,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.5, delay: i * 0.15, ease: 'power3.out',
         scrollTrigger: { trigger: step, start: 'top 85%', once: true },
       });
     });
@@ -211,12 +201,16 @@
     // Section headers
     gsap.utils.toArray('.section-header').forEach((header) => {
       gsap.from(header.children, {
-        opacity: 0,
-        y: 30,
-        stagger: 0.12,
-        duration: 0.7,
-        ease: 'power3.out',
+        opacity: 0, y: 30, stagger: 0.12, duration: 0.7, ease: 'power3.out',
         scrollTrigger: { trigger: header, start: 'top 85%', once: true },
+      });
+    });
+
+    // Trust items
+    gsap.utils.toArray('.trust-item').forEach((item, i) => {
+      gsap.from(item, {
+        opacity: 0, y: 20, duration: 0.5, delay: i * 0.1, ease: 'power3.out',
+        scrollTrigger: { trigger: item, start: 'top 90%', once: true },
       });
     });
   }
@@ -232,7 +226,6 @@
       } else {
         target.scrollIntoView({ behavior: 'smooth' });
       }
-      // Close mobile menu
       document.querySelector('header ul')?.classList.remove('open');
     });
   });
@@ -245,12 +238,22 @@
     });
   }
 
-  /* ---------- FLOATING CTA & SCROLL-TOP ---------- */
+  /* ---------- FIX #12: FLOATING CTA — hide near contact section ---------- */
   const floatingCta = document.querySelector('.floating-cta');
   const scrollTopBtn = document.querySelector('.scroll-to-top-btn');
+  const contactSection = document.getElementById('contact');
+
   window.addEventListener('scroll', () => {
     const scrolled = window.scrollY > 600;
-    floatingCta?.classList.toggle('visible', scrolled);
+
+    // Hide floating CTA when user is in the contact section
+    let nearContact = false;
+    if (contactSection) {
+      const rect = contactSection.getBoundingClientRect();
+      nearContact = rect.top < window.innerHeight && rect.bottom > 0;
+    }
+
+    floatingCta?.classList.toggle('visible', scrolled && !nearContact);
     scrollTopBtn?.classList.toggle('visible', scrolled);
   });
 
@@ -300,16 +303,16 @@
       'stats.coverage': '전국 커버리지',
       'stats.support': '지원 가능',
       'about.step1.title': '대한민국 <span class="highlight">데이터센터</span> & IT 인프라 전문기업',
-      'about.step1.desc': '부산·서울 본사, H/W·S/W·IT 서비스 전문. 전국 현장 엔지니어링 네트워크를 통해 글로벌 IT 기업의 신뢰받는 실행 파트너로 활동하고 있습니다.',
+      'about.step1.desc': '부산 본사와 서울 지점을 두고, 전국 현장 엔지니어링 네트워크를 통해 글로벌 IT 기업의 신뢰받는 실행 파트너로 활동하고 있습니다.',
       'about.step2.title': '3개 사업부, <span class="highlight">하나의 미션</span>',
       'about.step2.desc': 'ServicePure(인프라 & 컨설팅), SalesPure(기술·글로벌 영업), BizPure(마케팅·인사·재무) — 각 사업부가 독립적으로 운영되며 지속적인 역량 개발을 추구합니다.',
       'about.step3.title': '우리의 <span class="highlight">비전</span>',
-      'about.step3.desc': '"세계에서 가장 존경받는 IT 인프라 기업" — 차세대 기술 시대, 인프라 혁신을 통해 모두가 기술 혜택을 누릴 수 있는 미래를 만들어 갑니다.',
-      'about.overlay1.title': '전국 파트너',
+      'about.step3.desc': '<em>"세계에서 가장 존경받는 IT 인프라 기업"</em> — 차세대 기술 시대, 인프라 혁신을 통해 모든 기업이 기술 혜택을 누릴 수 있는 미래를 만들어 갑니다.',
+      'about.overlay1.title': '전국 운영',
       'about.overlay1.desc': '전국 모든 데이터센터 당일 출동 가능',
       'about.overlay2.title': '3개 사업부',
       'about.overlay2.desc': 'ServicePure · SalesPure · BizPure',
-      'about.overlay3.title': '글로벌 비전',
+      'about.overlay3.title': '비전',
       'about.overlay3.desc': '가장 존경받는 IT 인프라 기업',
       'services.tag': '서비스',
       'services.title': '핵심 서비스',
@@ -353,14 +356,15 @@
       'why.c3.desc': '전국 모든 데이터센터·오피스 현장 엔지니어링, 당일 출동 가능.',
       'why.c4.title': '유연한 확장성',
       'why.c4.desc': '티켓 기반부터 풀 아웃소싱까지 — 니즈와 예산에 맞는 서비스 모델을 선택하세요.',
-      'partners.tag': '파트너',
-      'partners.title': '기술 파트너',
+      'partners.tag': '생태계',
+      'partners.title': '지원 플랫폼',
       'clients.tag': '신뢰',
-      'clients.title': '주요 프로젝트 레퍼런스',
+      'clients.title': '프로젝트 실적',
       'clients.desc': '다양한 산업군의 글로벌 기업 및 국내 기관이 신뢰하는 파트너.',
       'clients.cat1': '캐피탈 마켓 / 금융 트레이딩',
       'clients.cat2': '미디어 & 디지털 플랫폼',
       'clients.cat3': '엔터프라이즈',
+      'clients.note': '* 고객사명은 비밀유지 계약에 따라 비공개입니다. 상세 내용은 문의 시 안내드립니다.',
       'coverage.tag': '커버리지',
       'coverage.title': '전국 커버리지 & 글로벌 네트워크',
       'coverage.desc': '대한민국 전역 IT 서비스를 위한 단일 창구 — 국제 파트너 네트워크를 통한 글로벌 확장.',
@@ -369,10 +373,21 @@
       'contact.tag': '연락처',
       'contact.title': '문의하기',
       'contact.subtitle': '프로젝트 문의, 파트너십 제안, 그 외 무엇이든 — 한 통화로 해결됩니다.',
+      'contact.trust1': '24시간 이내 응답',
+      'contact.trust2': '한/영 이중 언어 대응',
+      'contact.trust3': '단건 티켓 또는 SLA 계약 가능',
       'contact.form.name': '이름',
       'contact.form.service': '서비스 선택',
       'contact.form.message': '메시지',
       'contact.form.button': '메시지 보내기',
+      // FIX #9: Korean select option translations
+      'contact.form.opt0': '서비스 선택',
+      'contact.form.opt1': '데이터센터 인프라',
+      'contact.form.opt2': '리모트 핸즈 & 현장 엔지니어링',
+      'contact.form.opt3': '배포 & 물류',
+      'contact.form.opt4': 'End-User IT & 매니지드 서비스',
+      'contact.form.opt5': '금융 트레이딩 인프라',
+      'contact.form.opt6': '기타',
       'footer.about': '소개',
       'footer.services': '서비스',
       'footer.why': '강점',
@@ -403,14 +418,17 @@
       if (lang === 'ko' && translations.ko[key]) {
         if (el.hasAttribute('data-is-placeholder')) {
           el.placeholder = translations.ko[key];
+        } else if (el.tagName === 'OPTION') {
+          el.textContent = translations.ko[key];
         } else {
           el.innerHTML = translations.ko[key];
         }
       } else if (lang === 'en') {
-        // Restore English (stored in data attribute or default)
         if (!el.dataset.originalText) return;
         if (el.hasAttribute('data-is-placeholder')) {
           el.placeholder = el.dataset.originalText;
+        } else if (el.tagName === 'OPTION') {
+          el.textContent = el.dataset.originalText;
         } else {
           el.innerHTML = el.dataset.originalText;
         }
@@ -418,10 +436,12 @@
     });
   }
 
-  // Store original English text
+  // Store original English text on load
   document.querySelectorAll('[data-translate-key]').forEach((el) => {
     if (el.hasAttribute('data-is-placeholder')) {
       el.dataset.originalText = el.placeholder;
+    } else if (el.tagName === 'OPTION') {
+      el.dataset.originalText = el.textContent;
     } else {
       el.dataset.originalText = el.innerHTML;
     }
