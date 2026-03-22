@@ -846,6 +846,37 @@ header ul a:hover { color: var(--text-primary); }
   line-height: 1.6;
 }
 
+/* ========== CONTACT TRUST SIGNALS ========== */
+.contact-trust {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.trust-icon {
+  font-size: 18px;
+}
+
+/* ========== CLIENTS NOTE ========== */
+.clients-note {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin-top: 32px;
+  font-style: italic;
+}
+
 /* ========== CONTACT ========== */
 .contact-grid {
   display: grid;
