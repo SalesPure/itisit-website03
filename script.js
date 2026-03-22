@@ -1,450 +1,272 @@
-/* ============================
-   IT'S IT INC. — MAIN SCRIPT
-   Final version with all fixes
-   ============================ */
+(function(){
+'use strict';
 
-(function () {
-  'use strict';
+const header = document.getElementById('main-header');
+const canvas = document.getElementById('hero-background-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
 
-  /* ---------- INTRO ---------- */
-  const intro = document.getElementById('genesis-intro');
-  if (intro) {
-    setTimeout(() => {
-      intro.classList.add('done');
-      setTimeout(() => intro.remove(), 700);
-      initAnimations();
-    }, 2200);
-  } else {
-    initAnimations();
+/* ---- INTRO ---- */
+const intro = document.getElementById('genesis-intro');
+if(intro){
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{
+    intro.classList.add('done');
+    document.body.style.overflow='';
+    setTimeout(()=>intro.remove(),800);
+    if(header)header.classList.add('visible');
+    animateHero();
+    document.fonts.ready.then(()=>{ resize(); initDots(); buildTargets(); setTimeout(initScroll,200); });
+  },2800);
+}else{
+  if(header)header.classList.add('visible');
+  animateHero();
+  document.fonts.ready.then(()=>{ resize(); initDots(); buildTargets(); setTimeout(initScroll,200); });
+}
+
+/* ============================================
+   SQUARE DOTS — orbit → morph to stats text
+   ============================================ */
+const COUNT = 10000;
+let dots = [];
+let morphProgress = 0;
+let angle = 0;
+let mx = 0, my = 0;
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+class Dot {
+  constructor(i){
+    this.i = i;
+    this.orbitR = 150 + Math.random()*700;
+    this.theta = Math.random()*Math.PI*2;
+    this.phi = (Math.random()-0.5)*Math.PI*0.9;
+    this.speed = 0.0001 + Math.random()*0.0004;
+    this.yOff = (Math.random()-0.5)*0.00015;
+    this.sz = 0.3 + Math.random()*1.2;
+    this.baseAlpha = 0.08 + Math.random()*0.4;
+    this.delay = Math.random()*0.25;
+    this.x = 0; this.y = 0; this.alpha = this.baseAlpha;
+    this.tx = W/2; this.ty = H/2;
+    this.hasTarget = false;
   }
-
-  /* ---------- THREE.JS HERO BACKGROUND ---------- */
-  (function initHeroCanvas() {
-    const canvas = document.getElementById('hero-background-canvas');
-    if (!canvas || typeof THREE === 'undefined') return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const geometry = new THREE.BufferGeometry();
-    const count = 800;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 20;
-    }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const material = new THREE.PointsMaterial({
-      color: 0x4a6cf7,
-      size: 0.03,
-      transparent: true,
-      opacity: 0.6,
-      sizeAttenuation: true,
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-    camera.position.z = 5;
-
-    let mouseX = 0, mouseY = 0;
-    document.addEventListener('mousemove', (e) => {
-      mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
-      mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-      particles.rotation.y += 0.0005;
-      particles.rotation.x += 0.0002;
-      camera.position.x += (mouseX - camera.position.x) * 0.02;
-      camera.position.y += (-mouseY - camera.position.y) * 0.02;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  })();
-
-  /* ---------- GSAP ANIMATIONS ---------- */
-  function initAnimations() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-
-    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-
-    // Reveal containers
-    gsap.utils.toArray('.reveal-container > *').forEach((el) => {
-      gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 92%', once: true },
-      });
-    });
-
-    // Hero text stagger
-    gsap.from('.hero-text .reveal-container', {
-      opacity: 0,
-      y: 40,
-      stagger: 0.15,
-      duration: 0.6,
-      delay: 1.5,
-      ease: 'power3.out',
-    });
-
-    // Hero image
-    gsap.from('.hero-image', {
-      opacity: 0,
-      x: 60,
-      duration: 0.7,
-      delay: 1.8,
-      ease: 'power3.out',
-    });
-
-    // FIX #1: Stats counter — animate but keep static fallback visible
-    // Numbers already show correct values in HTML; animation is enhancement only
-    gsap.utils.toArray('.stat-number').forEach((el) => {
-      const target = parseInt(el.dataset.target);
-      const suffix = el.dataset.suffix || '';
-      const originalText = el.textContent; // preserve fallback
-
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 90%',
-        once: true,
-        onEnter: () => {
-          gsap.fromTo(
-            { val: 0 },
-            { val: target },
-            {
-              duration: 1.0,
-              ease: 'power2.out',
-              onUpdate: function () {
-                el.textContent = Math.round(this.targets()[0].val) + suffix;
-              },
-              onComplete: function () {
-                el.textContent = target + suffix; // ensure final value
-              },
-            }
-          );
-        },
-      });
-    });
-
-    // About scrolly — step activation
-    const aboutSteps = gsap.utils.toArray('.about-text-step');
-    const overlays = gsap.utils.toArray('.visual-overlay');
-
-    aboutSteps.forEach((step) => {
-      const stepNum = step.dataset.step;
-      ScrollTrigger.create({
-        trigger: step,
-        start: 'top 60%',
-        end: 'bottom 40%',
-        onEnter: () => activateStep(stepNum),
-        onEnterBack: () => activateStep(stepNum),
-      });
-    });
-
-    function activateStep(num) {
-      aboutSteps.forEach((s) => s.classList.toggle('active', s.dataset.step === num));
-      overlays.forEach((o) => o.classList.toggle('active', o.dataset.stepTarget === num));
-    }
-
-    // Service cards stagger
-    gsap.utils.toArray('.service-card').forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0, y: 30, duration: 0.45, delay: i * 0.06, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
-      });
-    });
-
-    // Why cards
-    gsap.utils.toArray('.why-card').forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0, y: 20, duration: 0.45, delay: i * 0.06, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
-      });
-    });
-
-    // Client cards
-    gsap.utils.toArray('.client-card').forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0, y: 15, duration: 0.35, delay: i * 0.04, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
-      });
-    });
-
-    // Coverage cards
-    gsap.utils.toArray('.coverage-card').forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0, y: 20, duration: 0.45, delay: i * 0.07, ease: 'power3.out',
-        scrollTrigger: { trigger: card, start: 'top 92%', once: true },
-      });
-    });
-
-    // Lifecycle steps
-    gsap.utils.toArray('.lifecycle-step').forEach((step, i) => {
-      gsap.from(step, {
-        opacity: 0, y: 20, duration: 0.4, delay: i * 0.08, ease: 'power3.out',
-        scrollTrigger: { trigger: step, start: 'top 92%', once: true },
-      });
-    });
-
-    // Section headers
-    gsap.utils.toArray('.section-header').forEach((header) => {
-      gsap.from(header.children, {
-        opacity: 0, y: 20, stagger: 0.08, duration: 0.5, ease: 'power3.out',
-        scrollTrigger: { trigger: header, start: 'top 92%', once: true },
-      });
-    });
-
-    // Trust items
-    gsap.utils.toArray('.trust-item').forEach((item, i) => {
-      gsap.from(item, {
-        opacity: 0, y: 15, duration: 0.35, delay: i * 0.06, ease: 'power3.out',
-        scrollTrigger: { trigger: item, start: 'top 92%', once: true },
-      });
-    });
+  orbitXY(){
+    const cx=W/2, cy=H/2;
+    const x3=this.orbitR*Math.cos(this.phi)*Math.cos(this.theta);
+    const y3=this.orbitR*Math.sin(this.phi);
+    const z3=this.orbitR*Math.cos(this.phi)*Math.sin(this.theta);
+    const p=400, s=p/(p+z3);
+    return { x:cx+x3*s+mx*s*40, y:cy+y3*s+my*s*40, s };
   }
-
-  /* ---------- SMOOTH NAV SCROLL ---------- */
-  document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener('click', (e) => {
-      const target = document.querySelector(link.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      if (typeof gsap !== 'undefined' && typeof ScrollToPlugin !== 'undefined') {
-        gsap.to(window, { duration: 0.8, scrollTo: { y: target, offsetY: 80 }, ease: 'power3.inOut' });
-      } else {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-      document.querySelector('header ul')?.classList.remove('open');
-    });
-  });
-
-  /* ---------- MOBILE MENU ---------- */
-  const menuBtn = document.querySelector('.mobile-menu-btn');
-  if (menuBtn) {
-    menuBtn.addEventListener('click', () => {
-      document.querySelector('header ul')?.classList.toggle('open');
-    });
-  }
-
-  /* ---------- FIX #12: FLOATING CTA — hide near contact section ---------- */
-  const floatingCta = document.querySelector('.floating-cta');
-  const scrollTopBtn = document.querySelector('.scroll-to-top-btn');
-  const contactSection = document.getElementById('contact');
-
-  window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY > 600;
-
-    // Hide floating CTA when user is in the contact section
-    let nearContact = false;
-    if (contactSection) {
-      const rect = contactSection.getBoundingClientRect();
-      nearContact = rect.top < window.innerHeight && rect.bottom > 0;
-    }
-
-    floatingCta?.classList.toggle('visible', scrolled && !nearContact);
-    scrollTopBtn?.classList.toggle('visible', scrolled);
-  });
-
-  /* ---------- CONTACT FORM ---------- */
-  const form = document.querySelector('.contact-form');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const status = form.querySelector('.form-status');
-      const data = new FormData(form);
-      try {
-        const res = await fetch('/.netlify/functions/contact', {
-          method: 'POST',
-          body: JSON.stringify(Object.fromEntries(data)),
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (res.ok) {
-          status.textContent = '✓ Message sent successfully!';
-          status.style.color = '#34d399';
-          form.reset();
-        } else {
-          status.textContent = '✗ Failed to send. Please try again.';
-          status.style.color = '#ef4444';
-        }
-      } catch {
-        status.textContent = '✗ Network error. Please try again.';
-        status.style.color = '#ef4444';
-      }
-    });
-  }
-
-  /* ---------- LANGUAGE SWITCHER ---------- */
-  const translations = {
-    ko: {
-      'nav.about': '소개',
-      'nav.services': '서비스',
-      'nav.why': '강점',
-      'nav.clients': '고객사',
-      'nav.contact': '문의',
-      'hero.title': '대한민국 데이터센터\n& IT 인프라 파트너',
-      'hero.subtitle': '전국 당일 현장 엔지니어링 · 한/영 이중 언어 지원 · 2024년 설립, 글로벌 기업 신뢰 파트너',
-      'hero.cta1': '견적 요청',
-      'hero.cta2': '서비스 보기',
-      'stats.established': '설립',
-      'stats.divisions': '사업부',
-      'stats.projects': '수행 프로젝트',
-      'stats.coverage': '전국 커버리지',
-      'stats.support': '지원 가능',
-      'about.step1.title': '대한민국 <span class="highlight">데이터센터</span> & IT 인프라 전문기업',
-      'about.step1.desc': '부산 본사와 서울 지점을 두고, 전국 현장 엔지니어링 네트워크를 통해 글로벌 IT 기업의 신뢰받는 실행 파트너로 활동하고 있습니다.',
-      'about.step2.title': '3개 사업부, <span class="highlight">하나의 미션</span>',
-      'about.step2.desc': 'ServicePure(인프라 & 컨설팅), SalesPure(기술·글로벌 영업), BizPure(마케팅·인사·재무) — 각 사업부가 독립적으로 운영되며 지속적인 역량 개발을 추구합니다.',
-      'about.step3.title': '우리의 <span class="highlight">비전</span>',
-      'about.step3.desc': '<em>"세계에서 가장 존경받는 IT 인프라 기업"</em> — 차세대 기술 시대, 인프라 혁신을 통해 모든 기업이 기술 혜택을 누릴 수 있는 미래를 만들어 갑니다.',
-      'about.overlay1.title': '전국 운영',
-      'about.overlay1.desc': '전국 모든 데이터센터 당일 출동 가능',
-      'about.overlay2.title': '3개 사업부',
-      'about.overlay2.desc': 'ServicePure · SalesPure · BizPure',
-      'about.overlay3.title': '비전',
-      'about.overlay3.desc': '가장 존경받는 IT 인프라 기업',
-      'services.tag': '서비스',
-      'services.title': '핵심 서비스',
-      'services.desc': '컨설팅부터 설치, 라이프사이클 관리까지 엔드투엔드 인프라 서비스를 제공합니다.',
-      'services.card1.title': '데이터센터 인프라',
-      'services.card1.desc': '서버 랙 & 스택 구축, 광섬유/구리 케이블링, BIOS/RAID/OS 설정, 하드웨어 수리 및 라이프사이클 관리.',
-      'services.card2.title': '리모트 핸즈 & 현장 엔지니어링',
-      'services.card2.desc': 'SLA 기반 현장 지원: 서버 진단, 하드웨어 교체, 케이블 패칭, 24/7 모니터링. 한/영 이중 언어 지원.',
-      'services.card3.title': '배포 & 물류',
-      'services.card3.desc': '수령, 검수, 자산 태깅, 스테이징, 사전 설정, 번인 테스트, 전국 안전 배송 및 설치까지 풀사이클 지원.',
-      'services.card4.title': 'End-User IT & 매니지드 서비스',
-      'services.card4.desc': '기업 PC 프로비저닝, OS 이미징, 엔드포인트 관리, 상주 엔지니어 IT 아웃소싱, OA 관리 & 네트워크 케이블링.',
-      'services.card5.title': '금융 트레이딩 인프라',
-      'services.card5.desc': '캐피탈 마켓 미션크리티컬 인프라: 초저지연 네트워크, 10G/25G/100G 배포, KRX/CME/SGX 연결, 제로다운타임 프로토콜.',
-      'services.cta': '견적 요청 →',
-      'services.badge': '전문 특화',
-      'lifecycle.tag': '운영 방식',
-      'lifecycle.title': '운영 프로세스',
-      'lifecycle.desc': '엔드투엔드 서비스 라이프사이클 관리 및 유연한 참여 모델.',
-      'lifecycle.s1.title': '기획',
-      'lifecycle.s1.desc': '컨설팅 · 설계 · 평가',
-      'lifecycle.s2.title': '배포',
-      'lifecycle.s2.desc': '설치 · 구성 · 테스트',
-      'lifecycle.s3.title': '운영',
-      'lifecycle.s3.desc': '모니터링 · 유지보수 · 24/7 지원',
-      'lifecycle.s4.title': '지원',
-      'lifecycle.s4.desc': '장애대응 · 업그레이드 · 리포팅',
-      'model.t1': '티켓 기반',
-      'model.d1': '소규모 IT 필요에 따른 건별 과금 지원. 간헐적 IT 요구사항이 있는 기업에 적합합니다.',
-      'model.t2': '유지보수',
-      'model.d2': '정기 예방 점검 & 우선 장애 대응. 24x7x4 긴급 옵션 제공.',
-      'model.t3': 'IT 아웃소싱',
-      'model.d3': '전담 상주 엔지니어. SLA 기반 풀 IT 매니지먼트 서비스 제공.',
-      'why.tag': '강점',
-      'why.title': 'Why It\'s IT',
-      'why.c1.title': '원스톱 창구',
-      'why.c1.desc': '전국 데이터센터 & IT 인프라 모든 니즈를 하나의 파트너가 해결 — 중간 단계 없이 빠르게.',
-      'why.c2.title': '네이티브 영어 커뮤니케이션',
-      'why.c2.desc': '글로벌 본사와 직접 이중 언어 지원 — 통역 불필요, 빠른 문제 해결.',
-      'why.c3.title': '전국 커버리지',
-      'why.c3.desc': '전국 모든 데이터센터·오피스 현장 엔지니어링, 당일 출동 가능.',
-      'why.c4.title': '유연한 확장성',
-      'why.c4.desc': '티켓 기반부터 풀 아웃소싱까지 — 니즈와 예산에 맞는 서비스 모델을 선택하세요.',
-      'partners.tag': '생태계',
-      'partners.title': '지원 플랫폼',
-      'clients.tag': '신뢰',
-      'clients.title': '프로젝트 실적',
-      'clients.desc': '다양한 산업군의 글로벌 기업 및 국내 기관이 신뢰하는 파트너.',
-      'clients.cat1': '캐피탈 마켓 / 금융 트레이딩',
-      'clients.cat2': '미디어 & 디지털 플랫폼',
-      'clients.cat3': '엔터프라이즈',
-      'clients.note': '* 고객사명은 비밀유지 계약에 따라 비공개입니다. 상세 내용은 문의 시 안내드립니다.',
-      'coverage.tag': '커버리지',
-      'coverage.title': '전국 커버리지 & 글로벌 네트워크',
-      'coverage.desc': '대한민국 전역 IT 서비스를 위한 단일 창구 — 국제 파트너 네트워크를 통한 글로벌 확장.',
-      'coverage.direct': '직접 커버리지',
-      'coverage.partner': '파트너 네트워크',
-      'contact.tag': '연락처',
-      'contact.title': '문의하기',
-      'contact.subtitle': '프로젝트 문의, 파트너십 제안, 그 외 무엇이든 — 한 통화로 해결됩니다.',
-      'contact.trust1': '24시간 이내 응답',
-      'contact.trust2': '한/영 이중 언어 대응',
-      'contact.trust3': '단건 티켓 또는 SLA 계약 가능',
-      'contact.form.name': '이름',
-      'contact.form.service': '서비스 선택',
-      'contact.form.message': '메시지',
-      'contact.form.button': '메시지 보내기',
-      // FIX #9: Korean select option translations
-      'contact.form.opt0': '서비스 선택',
-      'contact.form.opt1': '데이터센터 인프라',
-      'contact.form.opt2': '리모트 핸즈 & 현장 엔지니어링',
-      'contact.form.opt3': '배포 & 물류',
-      'contact.form.opt4': 'End-User IT & 매니지드 서비스',
-      'contact.form.opt5': '금융 트레이딩 인프라',
-      'contact.form.opt6': '기타',
-      'footer.about': '소개',
-      'footer.services': '서비스',
-      'footer.why': '강점',
-      'footer.clients': '고객사',
-      'footer.contact': '문의',
-      'floating.cta': '문의하기',
-    },
-  };
-
-  let currentLang = 'en';
-
-  document.querySelectorAll('.lang-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const lang = btn.dataset.lang;
-      if (lang === currentLang) return;
-      currentLang = lang;
-      document.querySelectorAll('.lang-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
-      applyTranslations(lang);
-    });
-  });
-
-  function applyTranslations(lang) {
-    document.querySelectorAll('[data-translate-key]').forEach((el) => {
-      const key = el.dataset.translateKey;
-      if (lang === 'ko' && translations.ko[key]) {
-        if (el.hasAttribute('data-is-placeholder')) {
-          el.placeholder = translations.ko[key];
-        } else if (el.tagName === 'OPTION') {
-          el.textContent = translations.ko[key];
-        } else {
-          el.innerHTML = translations.ko[key];
-        }
-      } else if (lang === 'en') {
-        if (!el.dataset.originalText) return;
-        if (el.hasAttribute('data-is-placeholder')) {
-          el.placeholder = el.dataset.originalText;
-        } else if (el.tagName === 'OPTION') {
-          el.textContent = el.dataset.originalText;
-        } else {
-          el.innerHTML = el.dataset.originalText;
-        }
-      }
-    });
-  }
-
-  // Store original English text on load
-  document.querySelectorAll('[data-translate-key]').forEach((el) => {
-    if (el.hasAttribute('data-is-placeholder')) {
-      el.dataset.originalText = el.placeholder;
-    } else if (el.tagName === 'OPTION') {
-      el.dataset.originalText = el.textContent;
+  update(){
+    this.theta += this.speed;
+    this.phi += Math.sin(angle*0.3+this.i*0.01)*this.yOff;
+    const o = this.orbitXY();
+    if(morphProgress <= 0.001){
+      this.x=o.x; this.y=o.y;
+      this.sz=(0.5+Math.random()*0.4)*o.s*2;
+      this.alpha=this.baseAlpha*o.s;
     } else {
-      el.dataset.originalText = el.innerHTML;
+      const raw=Math.max(0,Math.min(1,(morphProgress-this.delay)/(1-this.delay)));
+      const e=raw<0.5?4*raw*raw*raw:1-Math.pow(-2*raw+2,3)/2;
+      this.x=o.x+(this.tx-o.x)*e;
+      this.y=o.y+(this.ty-o.y)*e;
+      if(this.hasTarget){
+        this.alpha = this.baseAlpha + e*0.55;
+        this.sz = (0.5+o.s)*(1-e) + 1.3*e;
+      } else {
+        // Fully gone by 40% morph progress
+        this.alpha = this.baseAlpha * Math.max(0, 1 - e*2.5);
+        this.sz = (0.5+o.s) * Math.max(0, 1 - e*2.5);
+      }
+    }
+  }
+  draw(){
+    if(this.alpha<0.01) return;
+    ctx.globalAlpha=this.alpha;
+    ctx.fillRect(this.x-this.sz/2, this.y-this.sz/2, this.sz, this.sz);
+  }
+}
+
+function initDots(){ dots=[]; for(let i=0;i<COUNT;i++) dots.push(new Dot(i)); }
+
+function buildTargets(){
+  // Temporarily show stats overlay to measure real DOM positions
+  const overlay = document.querySelector('.stats-overlay');
+  if(overlay) overlay.style.opacity = '1';
+
+  const tmp=document.createElement('canvas');
+  const tc=tmp.getContext('2d');
+  tmp.width=W; tmp.height=H;
+  tc.fillStyle='#fff';
+  tc.textAlign='center'; tc.textBaseline='middle';
+
+  // Measure each real stat-num and stat-lbl from DOM
+  document.querySelectorAll('.stat-block').forEach(block=>{
+    const numEl = block.querySelector('.stat-num');
+    const lblEl = block.querySelector('.stat-lbl');
+    if(numEl){
+      const r = numEl.getBoundingClientRect();
+      const style = getComputedStyle(numEl);
+      const fs = parseFloat(style.fontSize);
+      tc.font = style.fontWeight+' '+fs+'px '+style.fontFamily;
+      tc.fillText(numEl.textContent, r.left+r.width/2, r.top+r.height/2);
+      tc.fillText(numEl.textContent, r.left+r.width/2+0.5, r.top+r.height/2);
+      tc.fillText(numEl.textContent, r.left+r.width/2, r.top+r.height/2+0.5);
+    }
+    if(lblEl){
+      const r = lblEl.getBoundingClientRect();
+      const style = getComputedStyle(lblEl);
+      const fs = parseFloat(style.fontSize);
+      tc.font = style.fontWeight+' '+fs+'px '+style.fontFamily;
+      tc.fillText(lblEl.textContent, r.left+r.width/2, r.top+r.height/2);
+      tc.fillText(lblEl.textContent, r.left+r.width/2+0.5, r.top+r.height/2);
+      tc.fillText(lblEl.textContent, r.left+r.width/2, r.top+r.height/2+0.5);
     }
   });
+
+  // Measure dividers
+  document.querySelectorAll('.stat-divider').forEach(div=>{
+    const r = div.getBoundingClientRect();
+    if(r.width>0 && r.height>0){
+      tc.fillStyle='rgba(255,255,255,0.5)';
+      tc.fillRect(r.left, r.top, Math.max(r.width,2), r.height);
+      tc.fillStyle='#fff';
+    }
+  });
+
+  // Hide overlay again
+  if(overlay) overlay.style.opacity = '0';
+
+  const img=tc.getImageData(0,0,W,H);
+  const targets=[];
+  const step=Math.max(1,Math.round(Math.sqrt(W*H/(COUNT*10))));
+  for(let y=0;y<H;y+=step) for(let x=0;x<W;x+=step){
+    if(img.data[(y*W+x)*4]>80) targets.push({x,y});
+  }
+  for(let i=targets.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[targets[i],targets[j]]=[targets[j],targets[i]];}
+  for(let i=0;i<dots.length;i++){
+    if(i<targets.length){ dots[i].tx=targets[i].x; dots[i].ty=targets[i].y; dots[i].hasTarget=true; }
+    else { dots[i].hasTarget=false; const o=dots[i].orbitXY(); dots[i].tx=o.x; dots[i].ty=o.y; }
+  }
+}
+
+function render(){
+  requestAnimationFrame(render);
+  angle+=0.005;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#4a6cf7';
+  for(const d of dots){ d.update(); d.draw(); }
+  ctx.globalAlpha=1;
+}
+
+document.addEventListener('mousemove',e=>{mx=e.clientX/W-0.5;my=e.clientY/H-0.5});
+window.addEventListener('resize',()=>{ resize(); document.fonts.ready.then(buildTargets); });
+
+resize(); initDots(); render();
+
+/* ---- HERO TEXT ANIM ---- */
+function animateHero(){
+  if(typeof gsap==='undefined')return;
+  const tl=gsap.timeline({delay:.3});
+  tl.to('.hero-label',{opacity:1,y:0,duration:.6,ease:'power3.out'});
+  tl.to('.hero-title .tl span',{y:0,opacity:1,duration:.9,stagger:.12,ease:'power4.out'},'-=.3');
+  tl.to('.hero-sub',{opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.4');
+  tl.to('.hero-ctas',{opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.3');
+  tl.to('.hero-scroll-indicator',{opacity:.6,duration:.8},'-=.2');
+}
+
+/* ============================================
+   SCROLL — Hero pinned, dots morph, stats-overlay fades in ON TOP
+   Stats overlay is INSIDE hero, so it's pinned too. No scroll-up.
+   ============================================ */
+function initScroll(){
+  if(typeof gsap==='undefined'||typeof ScrollTrigger==='undefined')return;
+  gsap.registerPlugin(ScrollTrigger,ScrollToPlugin);
+
+  ScrollTrigger.create({start:'top -80',onUpdate:s=>header?.classList.toggle('scrolled',s.progress>0)});
+  gsap.to('.scroll-progress-bar',{width:'100%',ease:'none',scrollTrigger:{trigger:'body',start:'top top',end:'bottom bottom',scrub:.3}});
+
+  const heroEl = document.getElementById('hero');
+  const statsOverlay = document.querySelector('.stats-overlay');
+  if(!heroEl) return;
+
+  ScrollTrigger.create({
+    trigger: heroEl,
+    start: 'top top',
+    end: '+=250%',
+    pin: true,
+    pinSpacing: true,
+    onUpdate: self => {
+      const p = self.progress;
+
+      // Phase 1 (0–0.3): hero text fades + blurs away
+      const ht = document.querySelector('.hero-text');
+      const si = document.querySelector('.hero-scroll-indicator');
+      const fade = Math.min(1, p/0.25);
+      if(ht){
+        ht.style.opacity = (1-fade);
+        ht.style.transform = 'scale('+(1-fade*0.06)+')';
+        ht.style.filter = 'blur('+fade*10+'px)';
+      }
+      if(si) si.style.opacity = Math.max(0, 0.6-fade*2);
+
+      // Phase 2 (0.15–0.85): dots morph into stats text shape
+      morphProgress = p<0.15 ? 0 : p>0.85 ? 1 : (p-0.15)/0.7;
+
+      // Phase 3 (0.92–1.0): dots fade out, real stats DOM appears
+      // Before 0.92 real DOM is completely hidden
+      const reveal = p<0.92 ? 0 : Math.min(1,(p-0.92)/0.08);
+      if(statsOverlay){
+        statsOverlay.style.opacity = reveal;
+      }
+      // Canvas: fully visible until swap, then fade
+      canvas.style.opacity = p<0.9 ? '1' : (1 - Math.min(1,(p-0.9)/0.1)).toString();
+    }
+  });
+
+  /* ---- Other section transitions ---- */
+  const ap=document.querySelector('.about-panel');
+  if(ap){const wL=document.createElement('div');wL.className='section-wipe-left';const wR=document.createElement('div');wR.className='section-wipe-right';ap.prepend(wL,wR);const atl=gsap.timeline({scrollTrigger:{trigger:ap,start:'top 80%',end:'top 20%',scrub:.6}});atl.to(wL,{scaleX:0,duration:1,ease:'power3.inOut'},0);atl.to(wR,{scaleX:0,duration:1,ease:'power3.inOut'},0);}
+  const sp2=document.querySelector('.services-panel');
+  if(sp2){sp2.style.clipPath='circle(0% at 50% 50%)';gsap.to(sp2,{clipPath:'circle(75% at 50% 50%)',ease:'power2.out',scrollTrigger:{trigger:sp2,start:'top 85%',end:'top 15%',scrub:.8}});}
+  gsap.utils.toArray('.portfolio-item').forEach((it,i)=>{gsap.fromTo(it,{opacity:0,x:i%2===0?-120:120,scale:.88},{opacity:1,x:0,scale:1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:it,start:'top 85%',once:true}})});
+  const cp=document.querySelector('.coverage-panel');if(cp)gsap.fromTo(cp,{clipPath:'polygon(0 0,0 0,0 100%,0 100%)'},{clipPath:'polygon(0 0,100% 0,100% 100%,0 100%)',ease:'power2.inOut',scrollTrigger:{trigger:cp,start:'top 80%',end:'top 20%',scrub:.8}});
+  const ctp=document.querySelector('.contact-panel');if(ctp)gsap.fromTo(ctp,{scale:.92,opacity:.5,borderRadius:'40px'},{scale:1,opacity:1,borderRadius:'0px',ease:'power2.out',scrollTrigger:{trigger:ctp,start:'top 85%',end:'top 30%',scrub:.6}});
+
+  /* ---- Element reveals ---- */
+  gsap.utils.toArray('.big-title').forEach(t=>{gsap.to(t.querySelectorAll('.tl span'),{y:0,opacity:1,duration:1,stagger:.1,ease:'power4.out',scrollTrigger:{trigger:t,start:'top 85%',once:true}})});
+  gsap.utils.toArray('.section-tag').forEach(t=>gsap.from(t,{opacity:0,y:15,duration:.5,scrollTrigger:{trigger:t,start:'top 90%',once:true}}));
+  gsap.utils.toArray('.section-desc').forEach(d=>gsap.from(d,{opacity:0,y:15,duration:.6,scrollTrigger:{trigger:d,start:'top 90%',once:true}}));
+  gsap.utils.toArray('.stat-num').forEach(el=>{const target=parseInt(el.dataset.target),suffix=el.dataset.suffix||'';ScrollTrigger.create({trigger:el,start:'top 90%',once:true,onEnter:()=>{gsap.fromTo({val:0},{val:target},{duration:1.2,ease:'power2.out',onUpdate:function(){el.textContent=Math.round(this.targets()[0].val)+suffix},onComplete:function(){el.textContent=target+suffix}})}})});
+  gsap.utils.toArray('.stat-block').forEach((b,i)=>gsap.from(b,{opacity:0,y:20,duration:.5,delay:i*.08,scrollTrigger:{trigger:b,start:'top 92%',once:true}}));
+  gsap.utils.toArray('.about-card').forEach((c,i)=>gsap.to(c,{x:0,opacity:1,duration:.7,delay:i*.15,scrollTrigger:{trigger:c,start:'top 85%',once:true}}));
+  gsap.from('.about-desc',{opacity:0,y:20,duration:.6,scrollTrigger:{trigger:'.about-desc',start:'top 90%',once:true}});
+  gsap.from('.vision-bar',{opacity:0,y:30,duration:.7,scrollTrigger:{trigger:'.vision-bar',start:'top 90%',once:true}});
+  gsap.utils.toArray('.service-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.7,delay:i*.1,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
+  gsap.utils.toArray('.lc-step').forEach((s,i)=>gsap.fromTo(s,{opacity:0,y:50,scale:.9},{opacity:1,y:0,scale:1,duration:.8,delay:i*.15,ease:'back.out(1.4)',scrollTrigger:{trigger:s,start:'top 88%',once:true}}));
+  gsap.utils.toArray('.model-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 90%',once:true}}));
+  gsap.utils.toArray('.why-card').forEach((c,i)=>gsap.fromTo(c,{opacity:0,y:60,scale:.85},{opacity:1,y:0,scale:1,duration:.8,delay:i*.12,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
+  gsap.utils.toArray('.cc').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.4,delay:i*.05,scrollTrigger:{trigger:c,start:'top 92%',once:true}}));
+  gsap.utils.toArray('.cov-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
+  gsap.utils.toArray('.trust-item').forEach((it,i)=>gsap.from(it,{opacity:0,y:15,duration:.4,delay:i*.08,scrollTrigger:{trigger:it,start:'top 92%',once:true}}));
+  gsap.utils.toArray('.pi-img img').forEach(img=>gsap.to(img,{yPercent:-10,ease:'none',scrollTrigger:{trigger:img.closest('.portfolio-item'),start:'top bottom',end:'bottom top',scrub:1}}));
+}
+
+/* ---- Utilities ---- */
+document.querySelectorAll('a[href^="#"]').forEach(l=>{l.addEventListener('click',e=>{const t=document.querySelector(l.getAttribute('href'));if(!t)return;e.preventDefault();if(typeof gsap!=='undefined')gsap.to(window,{scrollTo:{y:t,offsetY:80},duration:1,ease:'power3.inOut'});else t.scrollIntoView({behavior:'smooth'});document.querySelector('header ul')?.classList.remove('open')})});
+document.querySelector('.mobile-menu-btn')?.addEventListener('click',()=>document.querySelector('header ul')?.classList.toggle('open'));
+const fc=document.querySelector('.floating-cta'),stb=document.querySelector('.scroll-to-top-btn'),csc=document.getElementById('contact');
+window.addEventListener('scroll',()=>{const s=window.scrollY>600;let nc=false;if(csc){const r=csc.getBoundingClientRect();nc=r.top<window.innerHeight&&r.bottom>0}fc?.classList.toggle('visible',s&&!nc);stb?.classList.toggle('visible',s)});
+const form=document.querySelector('.contact-form');if(form)form.addEventListener('submit',async e=>{e.preventDefault();const status=form.querySelector('.form-status'),data=new FormData(form);try{const res=await fetch('/.netlify/functions/contact',{method:'POST',body:JSON.stringify(Object.fromEntries(data)),headers:{'Content-Type':'application/json'}});if(res.ok){status.textContent='✓ Sent!';status.style.color='#34d399';form.reset()}else{status.textContent='✗ Failed.';status.style.color='#ef4444'}}catch{status.textContent='✗ Error.';status.style.color='#ef4444'}});
+
+const translations={ko:{'nav.about':'소개','nav.services':'서비스','nav.portfolio':'포트폴리오','nav.why':'강점','nav.clients':'고객사','nav.contact':'문의','hero.label':'It\'s IT Inc.','hero.line1':'대한민국의 신뢰받는','hero.line2':'데이터센터 &','hero.line3':'IT 인프라','hero.line4':'파트너','hero.subtitle':'전국 당일 현장 엔지니어링 · 한/영 이중 언어 지원 · 글로벌 기업 신뢰 파트너','hero.cta1':'견적 요청','hero.cta2':'서비스 보기','stats.established':'설립','stats.divisions':'사업부','stats.projects':'수행 프로젝트','stats.coverage':'전국 커버리지','stats.support':'지원 가능','about.tag':'회사 소개','about.t1':'대한민국','about.t2':'데이터센터','about.t3':'& IT 인프라 전문기업','about.desc':'부산 본사와 서울 지점, 전국 현장 엔지니어링으로 글로벌 IT 기업의 파트너.','about.c1.title':'ServicePure','about.c1.desc':'인프라 & 컨설팅 · SI 솔루션','about.c2.title':'SalesPure','about.c2.desc':'기술·글로벌·국내 영업','about.c3.title':'BizPure','about.c3.desc':'마케팅·기획·인사·재무','services.tag':'서비스','services.title':'핵심 서비스','services.desc':'컨설팅~라이프사이클 관리 엔드투엔드.','services.card1.title':'데이터센터 인프라','services.card1.desc':'랙&스택, 케이블링, BIOS/RAID/OS, HW수리.','services.card2.title':'리모트 핸즈 & 현장 엔지니어링','services.card2.desc':'SLA기반: 서버진단, HW교체, 패칭, 24/7.','services.card3.title':'배포 & 물류','services.card3.desc':'수령~번인테스트~전국배송.','services.card4.title':'End-User IT & 매니지드','services.card4.desc':'PC프로비저닝, OS이미징, 상주엔지니어.','services.card5.title':'금융 트레이딩 인프라','services.card5.desc':'초저지연, 10G/25G/100G, KRX/CME/SGX.','services.badge':'전문 특화','portfolio.tag':'실적','portfolio.title':'구축, 유지보수 & 운영','lifecycle.tag':'운영 방식','lifecycle.title':'운영 프로세스','lifecycle.s1.title':'기획','lifecycle.s1.desc':'컨설팅·설계·평가','lifecycle.s2.title':'배포','lifecycle.s2.desc':'설치·구성·테스트','lifecycle.s3.title':'운영','lifecycle.s3.desc':'모니터링·유지보수·24/7','lifecycle.s4.title':'지원','lifecycle.s4.desc':'장애대응·업그레이드·리포팅','model.t1':'티켓 기반','model.d1':'건별 소규모 IT.','model.t2':'유지보수','model.d2':'정기점검 & 24x7x4.','model.t3':'IT 아웃소싱','model.d3':'전담 상주 SLA기반.','why.tag':'강점','why.title':'Why It\'s IT','why.c1.title':'원스톱 창구','why.c1.desc':'전국 DC & IT 하나로.','why.c2.title':'네이티브 영어','why.c2.desc':'글로벌 직접 이중언어.','why.c3.title':'전국 커버리지','why.c3.desc':'전국 당일 출동.','why.c4.title':'유연한 확장성','why.c4.desc':'티켓~풀 아웃소싱.','partners.tag':'생태계','partners.title':'지원 플랫폼','clients.tag':'신뢰','clients.title':'프로젝트 실적','clients.desc':'글로벌 기업이 신뢰.','clients.cat1':'캐피탈 마켓 / 금융','clients.cat2':'미디어 & 디지털','clients.cat3':'엔터프라이즈','clients.note':'* 비밀유지 계약.','coverage.tag':'커버리지','coverage.title':'전국 & 글로벌','coverage.desc':'전역 IT + 국제 파트너.','coverage.direct':'직접 커버리지','coverage.partner':'파트너 네트워크','contact.tag':'연락처','contact.title':'문의하기','contact.subtitle':'프로젝트~파트너십, 한 통화로.','contact.trust1':'24시간 이내','contact.trust2':'한/영 이중언어','contact.trust3':'단건 또는 SLA','contact.form.name':'이름','contact.form.service':'서비스 선택','contact.form.message':'메시지','contact.form.button':'보내기','contact.form.opt0':'서비스 선택','contact.form.opt1':'데이터센터 인프라','contact.form.opt2':'리모트 핸즈','contact.form.opt3':'배포 & 물류','contact.form.opt4':'End-User IT','contact.form.opt5':'금융 트레이딩','contact.form.opt6':'기타','footer.about':'소개','footer.services':'서비스','footer.why':'강점','footer.clients':'고객사','footer.contact':'문의','floating.cta':'문의하기'}};
+let currentLang='en';
+document.querySelectorAll('.lang-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.preventDefault();const lang=btn.dataset.lang;if(lang===currentLang)return;currentLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.documentElement.lang=lang==='ko'?'ko':'en';applyTranslations(lang)})});
+function applyTranslations(lang){document.querySelectorAll('[data-translate-key]').forEach(el=>{const key=el.dataset.translateKey;if(lang==='ko'&&translations.ko[key]){if(el.hasAttribute('data-is-placeholder'))el.placeholder=translations.ko[key];else if(el.tagName==='OPTION')el.textContent=translations.ko[key];else el.innerHTML=translations.ko[key]}else if(lang==='en'&&el.dataset.originalText){if(el.hasAttribute('data-is-placeholder'))el.placeholder=el.dataset.originalText;else if(el.tagName==='OPTION')el.textContent=el.dataset.originalText;else el.innerHTML=el.dataset.originalText}})}
+document.querySelectorAll('[data-translate-key]').forEach(el=>{if(el.hasAttribute('data-is-placeholder'))el.dataset.originalText=el.placeholder;else if(el.tagName==='OPTION')el.dataset.originalText=el.textContent;else el.dataset.originalText=el.innerHTML});
 
 })();
