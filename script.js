@@ -6,23 +6,17 @@ const canvas = document.getElementById('hero-background-canvas');
 const ctx = canvas.getContext('2d');
 let W, H;
 
-/* ---- SCROLL TO TOP ON LOAD (refresh always starts at page 1) ---- */
-window.scrollTo(0, 0);
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-
 /* ---- INTRO ---- */
 const intro = document.getElementById('genesis-intro');
 if(intro){
   document.body.style.overflow='hidden';
-  window.scrollTo(0, 0);
   setTimeout(()=>{
     intro.classList.add('done');
     document.body.style.overflow='';
-    window.scrollTo(0, 0);
     setTimeout(()=>intro.remove(),800);
     if(header)header.classList.add('visible');
     animateHero();
-    document.fonts.ready.then(()=>{ resize(); initDots(); buildTargets(); setTimeout(()=>{ window.scrollTo(0,0); initScroll(); },200); });
+    document.fonts.ready.then(()=>{ resize(); initDots(); buildTargets(); setTimeout(()=>{ initScroll(); },200); });
   },2800);
 }else{
   if(header)header.classList.add('visible');
