@@ -232,27 +232,27 @@ function initScroll(){
   const ap=document.querySelector('.about-panel');
   if(ap){const wL=document.createElement('div');wL.className='section-wipe-left';const wR=document.createElement('div');wR.className='section-wipe-right';ap.prepend(wL,wR);const atl=gsap.timeline({scrollTrigger:{trigger:ap,start:'top 80%',end:'top 20%',scrub:.6}});atl.to(wL,{scaleX:0,duration:1,ease:'power3.inOut'},0);atl.to(wR,{scaleX:0,duration:1,ease:'power3.inOut'},0);}
   const sp2=document.querySelector('.services-panel');
-  if(sp2){sp2.style.clipPath='circle(0% at 50% 50%)';gsap.to(sp2,{clipPath:'circle(75% at 50% 50%)',ease:'power2.out',scrollTrigger:{trigger:sp2,start:'top 85%',end:'top 15%',scrub:.8}});}
-  gsap.utils.toArray('.portfolio-item').forEach((it,i)=>{gsap.fromTo(it,{opacity:0,x:i%2===0?-120:120,scale:.88},{opacity:1,x:0,scale:1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:it,start:'top 85%',once:true}})});
+  if(sp2){sp2.style.clipPath='circle(0% at 50% 50%)';gsap.to(sp2,{clipPath:'circle(75% at 50% 50%)',ease:'power2.out',scrollTrigger:{trigger:sp2,start:'top 98%',end:'top 15%',scrub:.8}});}
+  gsap.utils.toArray('.portfolio-item').forEach((it,i)=>{gsap.fromTo(it,{opacity:0,x:i%2===0?-120:120,scale:.88},{opacity:1,x:0,scale:1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:it,start:'top 98%',once:true}})});
   const cp=document.querySelector('.coverage-panel');if(cp)gsap.fromTo(cp,{clipPath:'polygon(0 0,0 0,0 100%,0 100%)'},{clipPath:'polygon(0 0,100% 0,100% 100%,0 100%)',ease:'power2.inOut',scrollTrigger:{trigger:cp,start:'top 80%',end:'top 20%',scrub:.8}});
-  const ctp=document.querySelector('.contact-panel');if(ctp)gsap.fromTo(ctp,{scale:.92,opacity:.5,borderRadius:'40px'},{scale:1,opacity:1,borderRadius:'0px',ease:'power2.out',scrollTrigger:{trigger:ctp,start:'top 85%',end:'top 30%',scrub:.6}});
+  const ctp=document.querySelector('.contact-panel');if(ctp)gsap.fromTo(ctp,{scale:.92,opacity:.5,borderRadius:'40px'},{scale:1,opacity:1,borderRadius:'0px',ease:'power2.out',scrollTrigger:{trigger:ctp,start:'top 98%',end:'top 30%',scrub:.6}});
 
   /* ---- Element reveals ---- */
-  gsap.utils.toArray('.big-title').forEach(t=>{gsap.to(t.querySelectorAll('.tl span'),{y:0,opacity:1,duration:1,stagger:.1,ease:'power4.out',scrollTrigger:{trigger:t,start:'top 85%',once:true}})});
-  gsap.utils.toArray('.section-tag').forEach(t=>gsap.from(t,{opacity:0,y:15,duration:.5,scrollTrigger:{trigger:t,start:'top 90%',once:true}}));
-  gsap.utils.toArray('.section-desc').forEach(d=>gsap.from(d,{opacity:0,y:15,duration:.6,scrollTrigger:{trigger:d,start:'top 90%',once:true}}));
-  gsap.utils.toArray('.stat-num').forEach(el=>{const target=parseInt(el.dataset.target),suffix=el.dataset.suffix||'';ScrollTrigger.create({trigger:el,start:'top 90%',once:true,onEnter:()=>{gsap.fromTo({val:0},{val:target},{duration:1.2,ease:'power2.out',onUpdate:function(){el.textContent=Math.round(this.targets()[0].val)+suffix},onComplete:function(){el.textContent=target+suffix}})}})});
-  gsap.utils.toArray('.stat-block').forEach((b,i)=>gsap.from(b,{opacity:0,y:20,duration:.5,delay:i*.08,scrollTrigger:{trigger:b,start:'top 92%',once:true}}));
-  gsap.utils.toArray('.about-card').forEach((c,i)=>gsap.to(c,{x:0,opacity:1,duration:.7,delay:i*.15,scrollTrigger:{trigger:c,start:'top 85%',once:true}}));
-  gsap.from('.about-desc',{opacity:0,y:20,duration:.6,scrollTrigger:{trigger:'.about-desc',start:'top 90%',once:true}});
-  gsap.from('.vision-bar',{opacity:0,y:30,duration:.7,scrollTrigger:{trigger:'.vision-bar',start:'top 90%',once:true}});
-  gsap.utils.toArray('.service-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.7,delay:i*.1,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
-  gsap.utils.toArray('.lc-step').forEach((s,i)=>gsap.fromTo(s,{opacity:0,y:50,scale:.9},{opacity:1,y:0,scale:1,duration:.8,delay:i*.15,ease:'back.out(1.4)',scrollTrigger:{trigger:s,start:'top 88%',once:true}}));
-  gsap.utils.toArray('.model-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 90%',once:true}}));
-  gsap.utils.toArray('.why-card').forEach((c,i)=>gsap.fromTo(c,{opacity:0,y:60,scale:.85},{opacity:1,y:0,scale:1,duration:.8,delay:i*.12,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
-  gsap.utils.toArray('.cc').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.4,delay:i*.05,scrollTrigger:{trigger:c,start:'top 92%',once:true}}));
-  gsap.utils.toArray('.cov-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 88%',once:true}}));
-  gsap.utils.toArray('.trust-item').forEach((it,i)=>gsap.from(it,{opacity:0,y:15,duration:.4,delay:i*.08,scrollTrigger:{trigger:it,start:'top 92%',once:true}}));
+  gsap.utils.toArray('.big-title').forEach(t=>{gsap.to(t.querySelectorAll('.tl span'),{y:0,opacity:1,duration:1,stagger:.1,ease:'power4.out',scrollTrigger:{trigger:t,start:'top 98%',once:true}})});
+  gsap.utils.toArray('.section-tag').forEach(t=>gsap.from(t,{opacity:0,y:15,duration:.5,scrollTrigger:{trigger:t,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.section-desc').forEach(d=>gsap.from(d,{opacity:0,y:15,duration:.6,scrollTrigger:{trigger:d,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.stat-num').forEach(el=>{const target=parseInt(el.dataset.target),suffix=el.dataset.suffix||'';ScrollTrigger.create({trigger:el,start:'top 98%',once:true,onEnter:()=>{gsap.fromTo({val:0},{val:target},{duration:1.2,ease:'power2.out',onUpdate:function(){el.textContent=Math.round(this.targets()[0].val)+suffix},onComplete:function(){el.textContent=target+suffix}})}})});
+  gsap.utils.toArray('.stat-block').forEach((b,i)=>gsap.from(b,{opacity:0,y:20,duration:.5,delay:i*.08,scrollTrigger:{trigger:b,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.about-card').forEach((c,i)=>gsap.to(c,{x:0,opacity:1,duration:.7,delay:i*.15,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.from('.about-desc',{opacity:0,y:20,duration:.6,scrollTrigger:{trigger:'.about-desc',start:'top 98%',once:true}});
+  gsap.from('.vision-bar',{opacity:0,y:30,duration:.7,scrollTrigger:{trigger:'.vision-bar',start:'top 98%',once:true}});
+  gsap.utils.toArray('.service-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.7,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.lc-step').forEach((s,i)=>gsap.fromTo(s,{opacity:0,y:50,scale:.9},{opacity:1,y:0,scale:1,duration:.8,delay:i*.15,ease:'back.out(1.4)',scrollTrigger:{trigger:s,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.model-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.why-card').forEach((c,i)=>gsap.fromTo(c,{opacity:0,y:60,scale:.85},{opacity:1,y:0,scale:1,duration:.8,delay:i*.12,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.cc').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.4,delay:i*.05,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.cov-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.trust-item').forEach((it,i)=>gsap.from(it,{opacity:0,y:15,duration:.4,delay:i*.08,scrollTrigger:{trigger:it,start:'top 98%',once:true}}));
   gsap.utils.toArray('.pi-img img').forEach(img=>gsap.to(img,{yPercent:-10,ease:'none',scrollTrigger:{trigger:img.closest('.portfolio-item'),start:'top bottom',end:'bottom top',scrub:1}}));
 }
 
