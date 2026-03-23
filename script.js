@@ -242,17 +242,17 @@ function initScroll(){
   gsap.utils.toArray('.section-tag').forEach(t=>gsap.from(t,{opacity:0,y:15,duration:.5,scrollTrigger:{trigger:t,start:'top 98%',once:true}}));
   gsap.utils.toArray('.section-desc').forEach(d=>gsap.from(d,{opacity:0,y:15,duration:.6,scrollTrigger:{trigger:d,start:'top 98%',once:true}}));
   gsap.utils.toArray('.stat-num').forEach(el=>{const target=parseInt(el.dataset.target),suffix=el.dataset.suffix||'';ScrollTrigger.create({trigger:el,start:'top 98%',once:true,onEnter:()=>{gsap.fromTo({val:0},{val:target},{duration:1.2,ease:'power2.out',onUpdate:function(){el.textContent=Math.round(this.targets()[0].val)+suffix},onComplete:function(){el.textContent=target+suffix}})}})});
-  gsap.utils.toArray('.stat-block').forEach((b,i)=>gsap.from(b,{opacity:0,y:20,duration:.5,delay:i*.08,scrollTrigger:{trigger:b,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.about-card').forEach((c,i)=>gsap.to(c,{x:0,opacity:1,duration:.7,delay:i*.15,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.stat-block').forEach((b,i)=>gsap.from(b,{opacity:0,y:20,duration:.5,delay:i*.03,scrollTrigger:{trigger:b,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.about-card').forEach((c,i)=>gsap.to(c,{x:0,opacity:1,duration:.5,delay:i*.04,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
   gsap.from('.about-desc',{opacity:0,y:20,duration:.6,scrollTrigger:{trigger:'.about-desc',start:'top 98%',once:true}});
   gsap.from('.vision-bar',{opacity:0,y:30,duration:.7,scrollTrigger:{trigger:'.vision-bar',start:'top 98%',once:true}});
-  gsap.utils.toArray('.service-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.7,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.lc-step').forEach((s,i)=>gsap.fromTo(s,{opacity:0,y:50,scale:.9},{opacity:1,y:0,scale:1,duration:.8,delay:i*.15,ease:'back.out(1.4)',scrollTrigger:{trigger:s,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.model-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.why-card').forEach((c,i)=>gsap.fromTo(c,{opacity:0,y:60,scale:.85},{opacity:1,y:0,scale:1,duration:.8,delay:i*.12,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.cc').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.4,delay:i*.05,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.cov-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.6,delay:i*.1,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
-  gsap.utils.toArray('.trust-item').forEach((it,i)=>gsap.from(it,{opacity:0,y:15,duration:.4,delay:i*.08,scrollTrigger:{trigger:it,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.service-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.5,delay:i*.03,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.lc-step').forEach((s,i)=>gsap.fromTo(s,{opacity:0,y:50,scale:.9},{opacity:1,y:0,scale:1,duration:.8,delay:i*.05,ease:'back.out(1.4)',scrollTrigger:{trigger:s,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.model-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.5,delay:i*.03,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.why-card').forEach((c,i)=>gsap.fromTo(c,{opacity:0,y:60,scale:.85},{opacity:1,y:0,scale:1,duration:.8,delay:i*.04,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.cc').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.4,delay:i*.02,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.cov-card').forEach((c,i)=>gsap.to(c,{opacity:1,y:0,duration:.5,delay:i*.03,scrollTrigger:{trigger:c,start:'top 98%',once:true}}));
+  gsap.utils.toArray('.trust-item').forEach((it,i)=>gsap.from(it,{opacity:0,y:15,duration:.4,delay:i*.03,scrollTrigger:{trigger:it,start:'top 98%',once:true}}));
   gsap.utils.toArray('.pi-img img').forEach(img=>gsap.to(img,{yPercent:-10,ease:'none',scrollTrigger:{trigger:img.closest('.portfolio-item'),start:'top bottom',end:'bottom top',scrub:1}}));
 }
 
