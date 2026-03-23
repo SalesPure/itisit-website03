@@ -6,6 +6,10 @@ const canvas = document.getElementById('hero-background-canvas');
 const ctx = canvas.getContext('2d');
 let W, H;
 
+/* ---- SCROLL TO TOP ON LOAD (refresh always starts at page 1) ---- */
+window.scrollTo(0, 0);
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
 /* ---- INTRO ---- */
 const intro = document.getElementById('genesis-intro');
 if(intro){
