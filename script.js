@@ -78,7 +78,6 @@ class Dot {
         this.alpha = this.baseAlpha + e*0.55;
         this.sz = (0.5+o.s)*(1-e) + 1.3*e;
       } else {
-        // Fully gone by 40% morph progress
         this.alpha = this.baseAlpha * Math.max(0, 1 - e*2.5);
         this.sz = (0.5+o.s) * Math.max(0, 1 - e*2.5);
       }
@@ -94,7 +93,6 @@ class Dot {
 function initDots(){ dots=[]; for(let i=0;i<COUNT;i++) dots.push(new Dot(i)); }
 
 function buildTargets(){
-  // Temporarily show stats overlay to measure real DOM positions
   const overlay = document.querySelector('.stats-overlay');
   if(overlay) overlay.style.opacity = '1';
 
@@ -104,7 +102,6 @@ function buildTargets(){
   tc.fillStyle='#fff';
   tc.textAlign='center'; tc.textBaseline='middle';
 
-  // Measure each real stat-num and stat-lbl from DOM
   document.querySelectorAll('.stat-block').forEach(block=>{
     const numEl = block.querySelector('.stat-num');
     const lblEl = block.querySelector('.stat-lbl');
@@ -128,7 +125,6 @@ function buildTargets(){
     }
   });
 
-  // Measure dividers
   document.querySelectorAll('.stat-divider').forEach(div=>{
     const r = div.getBoundingClientRect();
     if(r.width>0 && r.height>0){
@@ -138,7 +134,6 @@ function buildTargets(){
     }
   });
 
-  // Hide overlay again
   if(overlay) overlay.style.opacity = '0';
 
   const img=tc.getImageData(0,0,W,H);
@@ -180,8 +175,9 @@ function animateHero(){
 }
 
 /* ============================================
-   SCROLL — Hero pinned, dots morph, stats-overlay fades in ON TOP
-   Stats overlay is INSIDE hero, so it's pinned too. No scroll-up.
+   SCROLL — Hero pinned, dots morph, stats-overlay fades in
+   CHANGED: +=250% → +=140% (스크롤 거리 44% 감소)
+   CHANGED: 페이즈 타이밍 조정 (더 빠르고 부드러운 전환)
    ============================================ */
 function initScroll(){
   if(typeof gsap==='undefined'||typeof ScrollTrigger==='undefined')return;
@@ -197,16 +193,16 @@ function initScroll(){
   ScrollTrigger.create({
     trigger: heroEl,
     start: 'top top',
-    end: '+=250%',
+    end: '+=140%',
     pin: true,
     pinSpacing: true,
     onUpdate: self => {
       const p = self.progress;
 
-      // Phase 1 (0–0.3): hero text fades + blurs away
+      // Phase 1 (0–0.2): hero text fades + blurs away (faster)
       const ht = document.querySelector('.hero-text');
       const si = document.querySelector('.hero-scroll-indicator');
-      const fade = Math.min(1, p/0.25);
+      const fade = Math.min(1, p/0.18);
       if(ht){
         ht.style.opacity = (1-fade);
         ht.style.transform = 'scale('+(1-fade*0.06)+')';
@@ -214,17 +210,15 @@ function initScroll(){
       }
       if(si) si.style.opacity = Math.max(0, 0.6-fade*2);
 
-      // Phase 2 (0.15–0.85): dots morph into stats text shape
-      morphProgress = p<0.15 ? 0 : p>0.85 ? 1 : (p-0.15)/0.7;
+      // Phase 2 (0.1–0.75): dots morph into stats text shape (tighter range)
+      morphProgress = p<0.1 ? 0 : p>0.75 ? 1 : (p-0.1)/0.65;
 
-      // Phase 3 (0.92–1.0): dots fade out, real stats DOM appears
-      // Before 0.92 real DOM is completely hidden
-      const reveal = p<0.92 ? 0 : Math.min(1,(p-0.92)/0.08);
+      // Phase 3 (0.82–0.95): dots fade out, real stats DOM appears (earlier reveal)
+      const reveal = p<0.82 ? 0 : Math.min(1,(p-0.82)/0.13);
       if(statsOverlay){
         statsOverlay.style.opacity = reveal;
       }
-      // Canvas: fully visible until swap, then fade
-      canvas.style.opacity = p<0.9 ? '1' : (1 - Math.min(1,(p-0.9)/0.1)).toString();
+      canvas.style.opacity = p<0.8 ? '1' : (1 - Math.min(1,(p-0.8)/0.15)).toString();
     }
   });
 
@@ -263,7 +257,8 @@ const fc=document.querySelector('.floating-cta'),stb=document.querySelector('.sc
 window.addEventListener('scroll',()=>{const s=window.scrollY>600;let nc=false;if(csc){const r=csc.getBoundingClientRect();nc=r.top<window.innerHeight&&r.bottom>0}fc?.classList.toggle('visible',s&&!nc);stb?.classList.toggle('visible',s)});
 const form=document.querySelector('.contact-form');if(form)form.addEventListener('submit',async e=>{e.preventDefault();const status=form.querySelector('.form-status'),data=new FormData(form);try{const res=await fetch('/.netlify/functions/contact',{method:'POST',body:JSON.stringify(Object.fromEntries(data)),headers:{'Content-Type':'application/json'}});if(res.ok){status.textContent='✓ Sent!';status.style.color='#34d399';form.reset()}else{status.textContent='✗ Failed.';status.style.color='#ef4444'}}catch{status.textContent='✗ Error.';status.style.color='#ef4444'}});
 
-const translations={ko:{'nav.about':'소개','nav.services':'서비스','nav.portfolio':'포트폴리오','nav.why':'강점','nav.clients':'고객사','nav.contact':'문의','hero.label':'It\'s IT Inc.','hero.line1':'대한민국의 신뢰받는','hero.line2':'데이터센터 &','hero.line3':'IT 인프라','hero.line4':'파트너','hero.subtitle':'전국 당일 현장 엔지니어링 · 한/영 이중 언어 지원 · 글로벌 기업 신뢰 파트너','hero.cta1':'견적 요청','hero.cta2':'서비스 보기','stats.established':'설립','stats.divisions':'사업부','stats.projects':'수행 프로젝트','stats.coverage':'전국 커버리지','stats.support':'지원 가능','about.tag':'회사 소개','about.t1':'대한민국','about.t2':'데이터센터','about.t3':'& IT 인프라 전문기업','about.desc':'부산 본사와 서울 지점, 전국 현장 엔지니어링으로 글로벌 IT 기업의 파트너.','about.c1.title':'ServicePure','about.c1.desc':'인프라 & 컨설팅 · SI 솔루션','about.c2.title':'SalesPure','about.c2.desc':'기술·글로벌·국내 영업','about.c3.title':'BizPure','about.c3.desc':'마케팅·기획·인사·재무','services.tag':'서비스','services.title':'핵심 서비스','services.desc':'컨설팅~라이프사이클 관리 엔드투엔드.','services.card1.title':'데이터센터 인프라','services.card1.desc':'랙&스택, 케이블링, BIOS/RAID/OS, HW수리.','services.card2.title':'리모트 핸즈 & 현장 엔지니어링','services.card2.desc':'SLA기반: 서버진단, HW교체, 패칭, 24/7.','services.card3.title':'배포 & 물류','services.card3.desc':'수령~번인테스트~전국배송.','services.card4.title':'End-User IT & 매니지드','services.card4.desc':'PC프로비저닝, OS이미징, 상주엔지니어.','services.card5.title':'금융 트레이딩 인프라','services.card5.desc':'초저지연, 10G/25G/100G, KRX/CME/SGX.','services.badge':'전문 특화','portfolio.tag':'실적','portfolio.title':'구축, 유지보수 & 운영','lifecycle.tag':'운영 방식','lifecycle.title':'운영 프로세스','lifecycle.s1.title':'기획','lifecycle.s1.desc':'컨설팅·설계·평가','lifecycle.s2.title':'배포','lifecycle.s2.desc':'설치·구성·테스트','lifecycle.s3.title':'운영','lifecycle.s3.desc':'모니터링·유지보수·24/7','lifecycle.s4.title':'지원','lifecycle.s4.desc':'장애대응·업그레이드·리포팅','model.t1':'티켓 기반','model.d1':'건별 소규모 IT.','model.t2':'유지보수','model.d2':'정기점검 & 24x7x4.','model.t3':'IT 아웃소싱','model.d3':'전담 상주 SLA기반.','why.tag':'강점','why.title':'Why It\'s IT','why.c1.title':'원스톱 창구','why.c1.desc':'전국 DC & IT 하나로.','why.c2.title':'네이티브 영어','why.c2.desc':'글로벌 직접 이중언어.','why.c3.title':'전국 커버리지','why.c3.desc':'전국 당일 출동.','why.c4.title':'유연한 확장성','why.c4.desc':'티켓~풀 아웃소싱.','partners.tag':'생태계','partners.title':'지원 플랫폼','clients.tag':'신뢰','clients.title':'프로젝트 실적','clients.desc':'글로벌 기업이 신뢰.','clients.cat1':'캐피탈 마켓 / 금융','clients.cat2':'미디어 & 디지털','clients.cat3':'엔터프라이즈','clients.note':'* 비밀유지 계약.','coverage.tag':'커버리지','coverage.title':'전국 & 글로벌','coverage.desc':'전역 IT + 국제 파트너.','coverage.direct':'직접 커버리지','coverage.partner':'파트너 네트워크','contact.tag':'연락처','contact.title':'문의하기','contact.subtitle':'프로젝트~파트너십, 한 통화로.','contact.trust1':'24시간 이내','contact.trust2':'한/영 이중언어','contact.trust3':'단건 또는 SLA','contact.form.name':'이름','contact.form.service':'서비스 선택','contact.form.message':'메시지','contact.form.button':'보내기','contact.form.opt0':'서비스 선택','contact.form.opt1':'데이터센터 인프라','contact.form.opt2':'리모트 핸즈','contact.form.opt3':'배포 & 물류','contact.form.opt4':'End-User IT','contact.form.opt5':'금융 트레이딩','contact.form.opt6':'기타','footer.about':'소개','footer.services':'서비스','footer.why':'강점','footer.clients':'고객사','footer.contact':'문의','floating.cta':'문의하기'}};
+/* CHANGED: 한국어 번역 — Smart Hands 포지셔닝 반영 */
+const translations={ko:{'nav.about':'소개','nav.services':'서비스','nav.portfolio':'포트폴리오','nav.why':'강점','nav.clients':'고객사','nav.contact':'문의','hero.label':'It\'s IT Inc.','hero.line1':'대한민국의 신뢰받는','hero.line2':'데이터센터 &','hero.line3':'IT 인프라','hero.line4':'파트너','hero.subtitle':'전국 당일 현장 엔지니어링 · 한/영 이중 언어 지원 · 글로벌 기업의 현장 엔지니어링 파트너','hero.cta1':'견적 요청','hero.cta2':'서비스 보기','stats.established':'설립','stats.divisions':'사업부','stats.projects':'수행 프로젝트','stats.coverage':'전국 커버리지','stats.support':'지원 가능','about.tag':'회사 소개','about.t1':'대한민국','about.t2':'데이터센터','about.t3':'& IT 인프라 전문기업','about.desc':'부산 본사와 서울 지점을 기반으로, 전국 현장 엔지니어링 서비스를 제공합니다. 단순 작업 대행이 아닌, 현장에서 솔루션을 제공하는 엔지니어링 파트너로서 글로벌 IT 기업의 한국 인프라를 책임집니다.','about.c1.title':'ServicePure','about.c1.desc':'인프라 & 컨설팅 · SI 솔루션','about.c2.title':'SalesPure','about.c2.desc':'기술·글로벌·국내 영업','about.c3.title':'BizPure','about.c3.desc':'마케팅·기획·인사·재무','services.tag':'서비스','services.title':'핵심 서비스','services.desc':'솔루션 설계부터 설치, 운영, 라이프사이클 관리까지 엔드투엔드 인프라 서비스.','services.card1.title':'데이터센터 인프라','services.card1.desc':'랙 배치 설계 & 구축, 광/동 케이블링 경로 설계, BIOS/RAID/OS 구성, HW 수리 및 라이프사이클 관리.','services.card2.title':'스마트 핸즈 & 현장 엔지니어링','services.card2.desc':'단순 리모트 핸즈를 넘어, 현장에서 솔루션을 제공합니다. 랙 배치 설계, 케이블 경로 설계 & 자재 관리, 물리 레이어 트러블슈팅(SFP, 패치, 광 추적), 원격 엔지니어링 팀과 실시간 협업.','services.card3.title':'배포 & 물류','services.card3.desc':'수령~번인테스트~전국배송.','services.card4.title':'End-User IT & 매니지드','services.card4.desc':'PC프로비저닝, OS이미징, 상주엔지니어.','services.card5.title':'금융 트레이딩 인프라','services.card5.desc':'초저지연, 10G/25G/100G, KRX/CME/SGX.','services.badge':'전문 특화','portfolio.tag':'실적','portfolio.title':'구축, 유지보수 & 운영','lifecycle.tag':'운영 방식','lifecycle.title':'운영 프로세스','lifecycle.s1.title':'기획','lifecycle.s1.desc':'컨설팅·설계·평가','lifecycle.s2.title':'배포','lifecycle.s2.desc':'설치·구성·테스트','lifecycle.s3.title':'운영','lifecycle.s3.desc':'모니터링·유지보수·24/7','lifecycle.s4.title':'지원','lifecycle.s4.desc':'장애대응·업그레이드·리포팅','model.t1':'티켓 기반','model.d1':'건별 소규모 IT.','model.t2':'유지보수','model.d2':'정기점검 & 24x7x4.','model.t3':'IT 아웃소싱','model.d3':'전담 상주 SLA기반.','why.tag':'강점','why.title':'Why It\'s IT','why.c1.title':'엔지니어링 파트너','why.c1.desc':'단순 작업 대행이 아닌, 랙 배치 설계부터 케이블 경로 설계, 물리 레이어 트러블슈팅까지 현장에서 솔루션을 제공합니다.','why.c2.title':'네이티브 영어','why.c2.desc':'글로벌 본사와 직접 이중언어 커뮤니케이션.','why.c3.title':'전국 커버리지','why.c3.desc':'전국 당일 출동.','why.c4.title':'유연한 확장성','why.c4.desc':'티켓~풀 아웃소싱.','partners.tag':'생태계','partners.title':'지원 플랫폼','clients.tag':'신뢰','clients.title':'프로젝트 실적','clients.desc':'글로벌 기업이 신뢰.','clients.cat1':'캐피탈 마켓 / 금융','clients.cat2':'미디어 & 디지털','clients.cat3':'엔터프라이즈','clients.note':'* 비밀유지 계약.','coverage.tag':'커버리지','coverage.title':'전국 & 글로벌','coverage.desc':'전역 IT + 국제 파트너.','coverage.direct':'직접 커버리지','coverage.partner':'파트너 네트워크','contact.tag':'연락처','contact.title':'문의하기','contact.subtitle':'프로젝트~파트너십, 한 통화로.','contact.trust1':'24시간 이내','contact.trust2':'한/영 이중언어','contact.trust3':'단건 또는 SLA','contact.form.name':'이름','contact.form.service':'서비스 선택','contact.form.message':'메시지','contact.form.button':'보내기','contact.form.opt0':'서비스 선택','contact.form.opt1':'데이터센터 인프라','contact.form.opt2':'스마트 핸즈 & 현장 엔지니어링','contact.form.opt3':'배포 & 물류','contact.form.opt4':'End-User IT','contact.form.opt5':'금융 트레이딩','contact.form.opt6':'기타','footer.about':'소개','footer.services':'서비스','footer.why':'강점','footer.clients':'고객사','footer.contact':'문의','floating.cta':'문의하기'}};
 let currentLang='en';
 document.querySelectorAll('.lang-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.preventDefault();const lang=btn.dataset.lang;if(lang===currentLang)return;currentLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.documentElement.lang=lang==='ko'?'ko':'en';applyTranslations(lang)})});
 function applyTranslations(lang){document.querySelectorAll('[data-translate-key]').forEach(el=>{const key=el.dataset.translateKey;if(lang==='ko'&&translations.ko[key]){if(el.hasAttribute('data-is-placeholder'))el.placeholder=translations.ko[key];else if(el.tagName==='OPTION')el.textContent=translations.ko[key];else el.innerHTML=translations.ko[key]}else if(lang==='en'&&el.dataset.originalText){if(el.hasAttribute('data-is-placeholder'))el.placeholder=el.dataset.originalText;else if(el.tagName==='OPTION')el.textContent=el.dataset.originalText;else el.innerHTML=el.dataset.originalText}})}
